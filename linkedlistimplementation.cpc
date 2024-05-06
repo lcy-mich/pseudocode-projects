@@ -1,0 +1,125 @@
+CONSTANT LINKED_LIST_UB = 100
+
+CLASS LinkedList
+    PRIVATE itemp : INTEGER
+    PRIVATE stemp : STRING
+
+    PRIVATE Head : INTEGER
+    PRIVATE FreeHead : INTEGER // yes please
+    PRIVATE Memory : ARRAY[0:LINKED_LIST_UB] OF STRING
+    PRIVATE Pointers : ARRAY[0:LINKED_LIST_UB] OF INTEGER
+    PUBLIC SIZE : INTEGER
+
+    PUBLIC PROCEDURE NEW()
+        DECLARE i : INTEGER
+        FOR i <- 0 TO LINKED_LIST_UB-1
+            Pointers[i] <- i+1
+        NEXT i
+        Pointers[LINKED_LIST_UB] <- -1
+
+        Head <- -1
+        FreeHead <- 0
+        SIZE <- 0
+    ENDPROCEDURE
+
+    PRIVATE FUNCTION getPointerFromIndex(Index : INTEGER) RETURNS INTEGER
+        DECLARE Pointer : INTEGER
+        Pointer <- Head
+
+        IF Index < 0 THEN
+            Index <- SIZE-((Index*-1-1) MOD SIZE)
+        ENDIF
+
+        IF Index <= SIZE THEN
+            IF Index > 0 THEN
+                DECLARE i : INTEGER
+                FOR i <- 1 TO Index
+                    Pointer <- Pointers[Pointer]
+                NEXT i
+            ENDIF
+
+            RETURN Pointer
+        ENDIF
+    ENDFUNCTION
+
+    PUBLIC FUNCTION index(Index : INTEGER) RETURNS STRING
+        RETURN Memory[getPointerFromIndex(Index)]
+    ENDFUNCTION
+
+    PUBLIC FUNCTION peek() RETURNS STRING
+
+        IF Head = -1 THEN
+            OUTPUT "Error: linked list is empty ඞ"
+            RETURN ""
+        ELSE
+            RETURN Memory[Head]
+        ENDIF
+
+    ENDFUNCTION
+
+    PUBLIC PROCEDURE append(Item: STRING)
+        IF Head = -1 THEN
+            Head <- FreeHead
+        ENDIF
+
+        Memory[FreeHead] <- Item
+        Pointers[getPointerFromIndex(SIZE)] <- FreeHead 
+        itemp <- FreeHead
+        FreeHead <- Pointers[FreeHead]
+        Pointers[itemp] <- -1
+
+        SIZE <- SIZE + 1
+    ENDPROCEDURE
+
+    PUBLIC PROCEDURE prepend(Item: STRING)
+        IF SIZE = 0 THEN
+            append(Item)
+        ELSE
+            Memory[FreeHead] <- Item
+            itemp <- Pointers[FreeHead]
+            Pointers[FreeHead] <- Head
+            FreeHead <- itemp
+
+            SIZE <- SIZE + 1
+        ENDIF
+    ENDPROCEDURE
+
+    PUBLIC FUNCTION pop() RETURNS INTEGER
+        DECLARE EndValue : INTEGER
+        DECLARE EndPointer : INTEGER
+        DECLARE PriorPointer : INTEGER
+
+        PriorPointer <- getPointerFromIndex(SIZE-1)
+        EndPointer <- Pointers[PriorPointer]
+        EndValue <- Memory[EndPointer]
+
+        Pointers[FreeHead] <- EndPointer
+        FreeHead <- Pointers[EndPointer]
+        Pointers[PriorPointer] <- -1
+        
+        SIZE <- SIZE -1
+        RETURN EndValue
+    ENDFUNCTION
+
+    PUBLIC PROCEDURE insert(Index: INTEGER, Item: STRING)
+        DECLARE PriorPointer = getPointerFromIndex(Index-1)
+        DECLARE AfterPointer = Pointers[Pointers[PriorPointer]]
+        
+        Memory[FreeHead] <- Item
+        Pointers[PriorPointer] <- FreeHead
+        itemp <- Pointers[FreeHead]
+        Pointers[FreeHead] <- AfterPointer
+        FreeHead <- Pointers[itemp] 
+    ENDPROCEDURE
+
+    PUBLIC PROCEDURE remove(Index: INTEGER)
+        DECLARE PriorPointer = getPointerFromIndex(Index-1)
+        DECLARE AfterPointer = Pointers[Pointers[PriorPointer]]
+        
+        itemp <- Pointers[PriorPointer]
+        Pointers[PriorPointer] <- AfterPointer
+
+        Pointers[itemp] <- FreeHead
+        FreeHead <- itemp
+    ENDPROCEDURE
+ENDCLASS
