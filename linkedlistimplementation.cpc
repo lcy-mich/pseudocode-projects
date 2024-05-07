@@ -18,7 +18,7 @@ CLASS LinkedList
         Pointers[LINKED_LIST_UB] <- -1
 
         Head <- -1
-        FreeHead <- 0
+        FreeHead <- 0 
         SIZE <- 0
     ENDPROCEDURE
 
@@ -46,15 +46,37 @@ CLASS LinkedList
         RETURN Memory[getPointerFromIndex(Index)]
     ENDFUNCTION
 
-    PUBLIC FUNCTION peek() RETURNS STRING
-
+    PUBLIC FUNCTION popFront() RETURNS STRING
         IF Head = -1 THEN
             OUTPUT "Error: linked list is empty ඞ"
             RETURN ""
         ELSE
+            stemp <- Memory[Head]
+            itemp <- Pointers[Head]
+            Pointers[Head] <- FreeHead
+            FreeHead <- Pointers[Head]
+            Head <- itemp
+
+            SIZE <- SIZE -1
             RETURN Memory[Head]
         ENDIF
+    ENDFUNCTION
 
+    PUBLIC FUNCTION pop() RETURNS STRING
+        DECLARE EndValue : STRING
+        DECLARE EndPointer : INTEGER
+        DECLARE PriorPointer : INTEGER
+
+        PriorPointer <- getPointerFromIndex(SIZE-1)
+        EndPointer <- Pointers[PriorPointer]
+        EndValue <- Memory[EndPointer]
+
+        Pointers[FreeHead] <- EndPointer
+        FreeHead <- Pointers[EndPointer]
+        Pointers[PriorPointer] <- -1
+        
+        SIZE <- SIZE -1
+        RETURN EndValue
     ENDFUNCTION
 
     PUBLIC PROCEDURE append(Item: STRING)
@@ -83,23 +105,6 @@ CLASS LinkedList
             SIZE <- SIZE + 1
         ENDIF
     ENDPROCEDURE
-
-    PUBLIC FUNCTION pop() RETURNS INTEGER
-        DECLARE EndValue : INTEGER
-        DECLARE EndPointer : INTEGER
-        DECLARE PriorPointer : INTEGER
-
-        PriorPointer <- getPointerFromIndex(SIZE-1)
-        EndPointer <- Pointers[PriorPointer]
-        EndValue <- Memory[EndPointer]
-
-        Pointers[FreeHead] <- EndPointer
-        FreeHead <- Pointers[EndPointer]
-        Pointers[PriorPointer] <- -1
-        
-        SIZE <- SIZE -1
-        RETURN EndValue
-    ENDFUNCTION
 
     PUBLIC PROCEDURE insert(Index: INTEGER, Item: STRING)
         DECLARE PriorPointer = getPointerFromIndex(Index-1)
