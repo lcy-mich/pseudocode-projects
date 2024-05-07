@@ -126,5 +126,7 @@ CLASS LinkedList
 
         Pointers[itemp] <- FreeHead
         FreeHead <- itemp
+        
+        SIZE <- SIZE - 1
     ENDPROCEDURE
 ENDCLASS
